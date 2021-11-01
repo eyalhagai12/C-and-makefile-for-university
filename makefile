@@ -15,9 +15,20 @@ advancedrec_obj = $(advancedrec:.c=.o)
 # main file
 main = main.c
 
+
+
+# make all 
+# ---------------------------------------------------------------------------------------------
+all: mains maindloop maindrec
+# --------------------------------------------------------------------------------------------- 
+
+
+
 # create basic_obj
+# ---------------------------------------------------------------------------------------------
 $(basic_obj): $(basic)
-	gcc -c -Wall -Werror $(basic)
+	$(CC) -c -Wall -Werror $(basic)
+# ---------------------------------------------------------------------------------------------
 
 
 # shared loop library
@@ -25,13 +36,13 @@ $(basic_obj): $(basic)
 loopd: libclassloops.so
 
 libclassloops.so: $(basic_obj:.o=Pic.o) $(advancedloops_obj:.o=Pic.o)
-	gcc -shared -o libclassloops.so $(basic_obj:.o=Pic.o) $(advancedloops_obj:.o=Pic.o)
+	$(CC) -shared -o libclassloops.so $(basic_obj:.o=Pic.o) $(advancedloops_obj:.o=Pic.o)
 
 $(basic_obj:.o=Pic.o): $(basic) 
-	gcc -c -fpic -Wall -Werror $(basic) -o $(basic_obj:.o=Pic.o) 
+	$(CC) -c -fpic -Wall -Werror $(basic) -o $(basic_obj:.o=Pic.o) 
 
 $(advancedloops_obj:.o=Pic.o): $(advancedloops)
-	gcc -c -fpic -Wall -Werror $(advancedloops) -o $(advancedloops_obj:.o=Pic.o)
+	$(CC) -c -fpic -Wall -Werror $(advancedloops) -o $(advancedloops_obj:.o=Pic.o)
 # ---------------------------------------------------------------------------------------------
 
 
@@ -41,13 +52,13 @@ $(advancedloops_obj:.o=Pic.o): $(advancedloops)
 recursived: libclassrec.so
 
 libclassrec.so: $(basic_obj:.o=RecPic.o) $(advancedrec_obj:.o=Pic.o)
-	gcc -shared -o libclassrec.so $(basic_obj:.o=RecPic.o) $(advancedrec_obj:.o=Pic.o)
+	$(CC) -shared -o libclassrec.so $(basic_obj:.o=RecPic.o) $(advancedrec_obj:.o=Pic.o)
 
 $(basic_obj:.o=RecPic.o): $(basic) 
-	gcc -c -fpic -Wall -Werror $(basic) -o $(basic_obj:.o=RecPic.o) 
+	$(CC) -c -fpic -Wall -Werror $(basic) -o $(basic_obj:.o=RecPic.o) 
 
 $(advancedrec_obj:.o=Pic.o): $(advancedrec)
-	gcc -c -fpic -Wall -Werror $(advancedrec) -o $(advancedrec_obj:.o=Pic.o)
+	$(CC) -c -fpic -Wall -Werror $(advancedrec) -o $(advancedrec_obj:.o=Pic.o)
 # ---------------------------------------------------------------------------------------------
 
 
@@ -60,7 +71,7 @@ libclassloops.a: $(basic_obj) $(advancedloops_obj)
 	ar -rc libclassloops.a $(basic_obj) $(advancedloops_obj)
 
 $(advancedloops_obj): $(advancedloops)
-	gcc -c -Wall -Werror $(advancedloops)
+	$(CC) -c -Wall -Werror $(advancedloops)
 # ---------------------------------------------------------------------------------------------
 
 
@@ -73,11 +84,40 @@ libclassrec.a: $(basic_obj) $(advancedrec_obj)
 	ar -rc libclassrec.a $(basic_obj) $(advancedrec_obj)
 
 $(advancedrec_obj): $(advancedrec)
-	gcc -c -Wall -Werror $(advancedrec)
+	$(CC) -c -Wall -Werror $(advancedrec)
 # ---------------------------------------------------------------------------------------------
 
-# ----------------------------------------------------
+
+
+# compile mains linked to the static recursion library
+# ---------------------------------------------------------------------------------------------
+mains: $(main:.c=.o) libclassrec.a
+	gcc -o mains $(main:.c=.o) -L. -lclassrec
+
+$(main:.c=.o): $(main)
+	gcc -c -Wall -Werror $(main)
+# ---------------------------------------------------------------------------------------------
+
+
+
+# compile mains and link to the shared loop library
+# ---------------------------------------------------------------------------------------------
+maindloop: libclassloops.so $(main)
+	gcc -Wall -o mains_loop $(main) libclassloops.so
+# ---------------------------------------------------------------------------------------------
+
+
+
+# compile mains and link to the shared recursion library
+# ---------------------------------------------------------------------------------------------
+maindrec: libclassrec.so $(main)
+	gcc -Wall -o mains_rec $(main) libclassrec.so
+# ---------------------------------------------------------------------------------------------
+
+
+
+# ---------------------------------------------------------------------------------------------
 clean:
-	rm *a *so *o mains
-# ----------------------------------------------------
+	rm *a *so *o mains mains_loop mains_rec
+# ---------------------------------------------------------------------------------------------
 
