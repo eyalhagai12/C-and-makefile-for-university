@@ -1,4 +1,4 @@
-# variables of c files
+# variables of c files test push
 basic = basicClassification.c
 advanced = advancedClassificationLoop.c
 
