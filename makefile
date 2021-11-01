@@ -1,88 +1,38 @@
-# variables of c files
+# Variables
+# compiler macro
+CC = gcc
+
+# files macro
 basic = basicClassification.c
-advanced = advancedClassificationLoop.c
-
-# get the object files
 basic_obj = $(basic:.c=.o)
-advanced_obj = $(advanced:.c=.o)
 
-# the main c file
-main = mains.c
+advancedloops = advancedClassificationLoop.c
+advancedloops_obj = $(advancedloops:.c=.o)
 
-# loops static library
-# -------------------------------------------------------------------------
-loops: libclassloops.a
+advancedrec = advancedClassificationRecursion.c
+advancedrec = $(advancedrec:.c=.o)
 
-libclassloops.a: $(basic_obj) $(advanced_obj) # create library
-	ar -rc libclassloops.a $(basic_obj) $(advanced_obj)
-
-$(basic_obj): $(basic)
-	gcc -c -Wall $(basic)
-
-$(advanced_obj): $(advanced)
-	gcc -c -Wall $(advanced)
-# -------------------------------------------------------------------------
+# main file
+main = main.c
 
 
-
-# recursives static library
-# -------------------------------------------------------------------------
-recursives: libclassrec.a
-
-libclassrec.a: $(basic_obj) $(advanced:Loop.c=Recursion.o) # create library
-	ar -rc libclassrec.a $(basic_obj) $(advanced:Loop.c=Recursion.o)
-
-$(basic_obj): $(basic)
-	gcc -c -Wall $(basic)
-
-$(advanced:Loop.c=Recursion.o): $(advanced:Loop=Recursion)
-	gcc -c -Wall $(advanced:Loop.c=Recursion.c)
-# -------------------------------------------------------------------------
-
-
-
-# loops shared library
-# -------------------------------------------------------------------------
+# shared loop library
+# ----------------------------------------------------
 loopd: libclassloops.so
 
-libclassloops.so: $(basic_obj) $(advanced_obj)
-	gcc -shared -o libclassloops.so $(basic_obj) $(advanced_obj)
+libclassloops.so: $(basic_obj:.o=Pic.o) $(advancedloops_obj:.o=Pic.o)
+	gcc -shared -o libclassloops.so $(basic_obj:.o=Pic.o) $(advancedloops_obj:.o=Pic.o)
 
-$(basic_obj): $(basic)
-	gcc -c -Wall -Werror -fpic $(basic)
+$(basic_obj:.o=Pic.o): $(basic) 
+	gcc -c -fpic -Wall -Werror $(basic) -o $(basic_obj:.o=Pic.o) 
 
-$(advanced_obj): $(advanced)
-	gcc -c -Wall -Werror -fpic $(advanced)
-# -------------------------------------------------------------------------
-
-
-
-# recursive shared library
-# -------------------------------------------------------------------------
-recursived: libclassrec.so
-
-libclassrec.so: $(basic:Loop.c=Recursion.o) $(advanced:Loop.c=Recursion.o)
-	gcc -shared -o libclassrec.so $(basic:Loop.c=Recursion.o) $(advanced:Loop.c=Recursion.o)
-
-$(basic:Loop.c=Recursion.o): $(basic:Loop.c=Recursion.c)
-	gcc -c -Wall -Werror -fpic $(basic:Loop.c=Recursion.c)
-
-$(advanced:Loop.c=Recursion.o): $(advanced:Loop.c=Recursion.c)
-	gcc -c -Wall -Werror -fpic $(advanced:Loop.c=Recursion.c)
-# -------------------------------------------------------------------------
+$(advancedloops_obj:.o=Pic.o): $(advancedloops)
+	gcc -c -fpic -Wall -Werror $(advancedloops) -o $(advancedloops_obj:.o=Pic.o)
+# ----------------------------------------------------
 
 
-
-# mains compilation linked to recursive static library
-# -------------------------------------------------------------------------
-mains: recursives 
-	gcc -Wall -o mains $(main) libclassrec.a
-# -------------------------------------------------------------------------
-
-
-
-# clean
-# -------------------------------------------------------------------------
+# ----------------------------------------------------
 clean:
-	rm *a *o *so mains
-# -------------------------------------------------------------------------
+	rm *a *so *o mains
+# ----------------------------------------------------
+
