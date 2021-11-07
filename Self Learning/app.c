@@ -5,11 +5,11 @@ int minIndex(char arr[], int size, int start);
 
 int main(int argc, char const *argv[])
 {
-    char arr[] = "bcfadegs";
+    char arr[] = "gajbhuytrewqzxcfdpolkmnsiv";
     int size = sizeof(arr) - 1;
 
     for (int i = 0; i < size; ++i){
-        int index = minIndex(arr, size - i, i);
+        int index = minIndex(arr, size, i);
         swap(arr, i, index);
     }
 
@@ -17,7 +17,7 @@ int main(int argc, char const *argv[])
         printf("%c", arr[i]);
     }
     printf("\n");
-    
+
     return 0;
 }
 
